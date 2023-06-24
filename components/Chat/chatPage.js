@@ -22,8 +22,6 @@ export default function ChatPage() {
     }
   }, [chatContext?.selectedConversation]);
 
-  console.log(curConversation);
-
   return (
     <>
       <ChatTitle conversation={curConversation} />

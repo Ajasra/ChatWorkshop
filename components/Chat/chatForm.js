@@ -3,6 +3,11 @@ import { useContext, useState } from "react";
 import { ChatContext, ChatDispatchContext } from "components/Context/context";
 import { ShowInfo } from "utils/notifications";
 import { getConversationindex } from "utils/conv_helpers";
+import { ChatOpenAI } from "langchain/chat_models/openai";
+import { HumanChatMessage } from "langchain/schema";
+
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_API;
+const LOCAL_KEY = process.env.NEXT_PUBLIC_LOCAL_KEY;
 
 export default function ChatForm(props) {
   const { conversation } = props;
@@ -29,20 +34,55 @@ export default function ChatForm(props) {
       setProcessing(true);
       ShowInfo("Please wait", "Getting response...");
 
-      let conv = chatContext?.conversations;
-      let indx = getConversationindex(conv, conversation.id);
-      let history = [];
-      if (conv[indx]?.history != null) {
-        history = conv[indx].history;
+      try {
+        let api_url = "/api/get_response";
+        if (BACKEND_URL !== undefined) {
+          api_url = `${BACKEND_URL}/get_response`;
+        }
+
+        let history = [];
+        if (conversation.history != null) {
+          history = conversation.history;
+        }
+
+        const response = await fetch(api_url, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+          body: JSON.stringify({
+            history: history,
+            api_key: LOCAL_KEY,
+            question: question,
+          }),
+        });
+
+        const json = await response.json().catch((err) => {
+          console.error(err);
+          setProcessing(false);
+        });
+
+        if (json.code == 200) {
+          let conv = chatContext?.conversations;
+          let indx = getConversationindex(conv, conversation.id);
+          let history = [];
+          if (conv[indx]?.history != null) {
+            history = conv[indx].history;
+          }
+          history.push({
+            question: question,
+            response: json.response,
+          });
+          conv[indx].history = history;
+          setChatContext({ ...chatContext, conversations: conv });
+        }
+      } catch (e) {
+        console.log(e);
       }
-      history.push({
-        question: question,
-        response: "Loading...",
-      });
-      conv[indx].history = history;
-      setChatContext({ ...chatContext, conversations: conv });
 
       setProcessing(false);
+      setQuestion('');
     }
   }
 
