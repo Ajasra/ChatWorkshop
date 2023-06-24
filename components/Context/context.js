@@ -4,15 +4,12 @@ const ChatContext = createContext(undefined);
 const ChatDispatchContext = createContext(undefined);
 
 function ChatProvider({ children }) {
-  const [context, setContext] = useState({
-    conversations: [],
-    currentConversation: null,
-  });
+  const [context, setContext] = useState();
 
   useEffect(() => {
-    const loggedInUser = localStorage.getItem("chat_assistant");
-    if (loggedInUser) {
-      setContext(JSON.parse(loggedInUser));
+    const convData = localStorage.getItem("chat_assistant");
+    if (convData) {
+      setContext(JSON.parse(convData));
     }
   }, []);
 
