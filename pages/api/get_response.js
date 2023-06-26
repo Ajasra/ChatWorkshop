@@ -18,6 +18,8 @@ const SYSTEM_PROMPT =
 export default async function handler(req, res) {
   if (req.method === "POST") {
     const { api_key, history, question } = req.body;
+    
+    console.log(question);
 
     if ((api_key !== local_api_key) | (api_key == null)) {
       res.status(401).json({ error: "not authorized" });
@@ -53,14 +55,22 @@ export default async function handler(req, res) {
       prompt: chatPrompt,
       llm: chat,
     });
+    
+    console.log(question);
 
-    const response = await chain.call({
-      input: question,
-    });
-
-    console.log(response);
-
-    res.status(200).json({ code: 200, response: response.response });
+    try {
+      const response = await chain.call({
+        input: question,
+      });
+      
+      console.log(response);
+      
+      res.status(200).json({ code: 200, response: response.response });
+    } catch (error) {
+      console.log(error);
+      res.status(500).json({ code: 500, error: error });
+    }
+    
   } else {
     res.status(401).json({ error: "not authorized" });
   }

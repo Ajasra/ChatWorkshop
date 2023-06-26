@@ -3,8 +3,6 @@ import { useContext, useState } from "react";
 import { ChatContext, ChatDispatchContext } from "components/Context/context";
 import { ShowInfo } from "utils/notifications";
 import { getConversationindex } from "utils/conv_helpers";
-import { ChatOpenAI } from "langchain/chat_models/openai";
-import { HumanChatMessage } from "langchain/schema";
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_API;
 const LOCAL_KEY = process.env.NEXT_PUBLIC_LOCAL_KEY;

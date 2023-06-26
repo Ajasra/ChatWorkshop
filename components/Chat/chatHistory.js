@@ -1,7 +1,82 @@
-import { Container, Title, Text } from "@mantine/core";
+import { Container, Title, Text, Button } from "@mantine/core";
+import { useContext, useEffect, useState } from "react";
+import { PlayIcon } from "@radix-ui/react-icons";
+import { ChatContext, ChatDispatchContext } from "components/Context/context";
+import { getConversationindex } from "utils/conv_helpers";
+
+import useSound from "use-sound";
+import AudioPlayer from "utils/audioplayer";
+
+const LOCAL_KEY = process.env.NEXT_PUBLIC_LOCAL_KEY;
 
 export default function ChatHistory(props) {
   const { conversation } = props;
+
+  const chatContext = useContext(ChatContext);
+  const setChatContext = useContext(ChatDispatchContext);
+
+  const [speechFile, setSpeechFile] = useState(null);
+  const [processing, setProcessing] = useState(false);
+  const [historySize, setHistorySize] = useState(0);
+
+  function playSound(file) {
+    setProcessing(true);
+    const audioElement = new Audio(file);
+    setSpeechFile(audioElement);
+    
+    audioElement.addEventListener("canplaythrough", () => {
+      audioElement.play();
+    });
+    
+    audioElement.addEventListener("ended", () => {
+      setProcessing(false);
+    });
+  }
+
+  async function generateSpeech(text, id) {
+    setProcessing(true);
+
+    let api_url = "/api/elevenlabs";
+    const response = await fetch(api_url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      body: JSON.stringify({ messages: text, key: LOCAL_KEY }),
+    });
+
+    const json = await response.json().catch((err) => {
+      console.error(err);
+      setProcessing(false);
+    });
+
+    if (json.error === null) {
+      const s_id = json.response;
+
+      let conversation = chatContext.conversations;
+      let indx = getConversationindex(conversation, props.conversation.id);
+      let history = conversation[indx].history;
+      history[id] = {
+        ...history[id],
+        speech: `/resp/r_${s_id}.mp3`,
+      };
+      conversation[indx].history = history;
+      setChatContext({
+        ...chatContext,
+        conversations: conversation,
+      });
+      playSound(`/resp/r_${s_id}.mp3`);
+    }
+  }
+
+  useEffect(() => {
+    if (conversation?.history != null) {
+      setHistorySize(conversation.history.length);
+    }
+  }, [conversation]);
+
+  // console.log(historySize);
 
   return (
     <>
@@ -17,6 +92,21 @@ export default function ChatHistory(props) {
                 {message.question}
               </Title>
               <Text>{message.response}</Text>
+              {index === historySize - 1 && message.speech == null && (
+                <Button mt={16}
+                  // className={styles.play_icon}
+                  onClick={() => generateSpeech(message.response, index)}
+                >
+                  <PlayIcon />
+                  <i className="fa-solid fa-copy"></i>
+                </Button>
+              )}
+
+              {message.speech != null && (
+                <>
+                  <AudioPlayer filename={message.speech} />
+                </>
+              )}
             </Container>
           ))}
         </>
