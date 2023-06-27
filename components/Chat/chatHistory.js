@@ -3,11 +3,14 @@ import { useContext, useEffect, useState } from "react";
 import { PlayIcon } from "@radix-ui/react-icons";
 import { ChatContext, ChatDispatchContext } from "components/Context/context";
 import { getConversationindex } from "utils/conv_helpers";
+import ReactMarkdown from "react-markdown";
 
 import useSound from "use-sound";
 import AudioPlayer from "utils/audioplayer";
 
 const LOCAL_KEY = process.env.NEXT_PUBLIC_LOCAL_KEY;
+
+const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export default function ChatHistory(props) {
   const { conversation } = props;
@@ -19,8 +22,9 @@ export default function ChatHistory(props) {
   const [processing, setProcessing] = useState(false);
   const [historySize, setHistorySize] = useState(0);
 
-  function playSound(file) {
+  async function playSound(file) {
     setProcessing(true);
+    await delay(1500);
     const audioElement = new Audio(file);
     setSpeechFile(audioElement);
     
@@ -35,6 +39,7 @@ export default function ChatHistory(props) {
 
   async function generateSpeech(text, id) {
     setProcessing(true);
+    setSpeechFile(null);
 
     let api_url = "/api/elevenlabs";
     const response = await fetch(api_url, {
@@ -66,7 +71,7 @@ export default function ChatHistory(props) {
         ...chatContext,
         conversations: conversation,
       });
-      playSound(`/resp/r_${s_id}.mp3`);
+      await playSound(`/resp/r_${s_id}.mp3`);
     }
   }
 
@@ -91,9 +96,12 @@ export default function ChatHistory(props) {
               <Title order={3} color="blue.6">
                 {message.question}
               </Title>
-              <Text>{message.response}</Text>
-              {index === historySize - 1 && message.speech == null && (
-                <Button mt={16}
+              <Text>
+                <ReactMarkdown>{message.response}</ReactMarkdown>
+              </Text>
+              {index >= historySize - 1 && message.speech == null && (
+                <Button
+                  mt={16}
                   // className={styles.play_icon}
                   onClick={() => generateSpeech(message.response, index)}
                 >
