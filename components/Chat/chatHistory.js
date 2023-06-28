@@ -7,6 +7,7 @@ import ReactMarkdown from "react-markdown";
 
 import useSound from "use-sound";
 import AudioPlayer from "utils/audioplayer";
+import SpeechGenerate from "utils/speechgenerate";
 
 const LOCAL_KEY = process.env.NEXT_PUBLIC_LOCAL_KEY;
 
@@ -99,6 +100,7 @@ export default function ChatHistory(props) {
               <Text>
                 <ReactMarkdown>{message.response}</ReactMarkdown>
               </Text>
+              <SpeechGenerate message={message.response} />
               {index >= historySize - 1 && message.speech == null && (
                 <Button
                   mt={16}
