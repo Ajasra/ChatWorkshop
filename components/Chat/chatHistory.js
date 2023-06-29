@@ -8,6 +8,7 @@ import ReactMarkdown from "react-markdown";
 import useSound from "use-sound";
 import AudioPlayer from "utils/audioplayer";
 import SpeechGenerate from "utils/speechgenerate";
+import GenerateVideo from "components/Chat/GenerateVideo";
 
 const LOCAL_KEY = process.env.NEXT_PUBLIC_LOCAL_KEY;
 
@@ -126,6 +127,7 @@ export default function ChatHistory(props) {
           you.
         </div>
       )}
+      <GenerateVideo />
     </>
   );
 }
