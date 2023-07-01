@@ -9,6 +9,8 @@ import {
 import { ChatContext, ChatDispatchContext } from "components/Context/context";
 import { getConversationindex } from "utils/conv_helpers";
 
+import styles from "styles/Chat.module.css";
+
 export default function ChatTitle(props) {
   const { conversation } = props;
 
@@ -57,12 +59,12 @@ export default function ChatTitle(props) {
   }, [conversation]);
 
   return (
-    <div style={{ position: "relative" }}>
+    <div className={styles.chat_title}>
       <Group
         sx={(theme) => ({
           position: "absolute",
           right: "2em",
-          top: "1em",
+          top: "0em",
           zIndex: "1",
           "@media (max-width: 48em)": {
             top: "0em",
@@ -70,43 +72,55 @@ export default function ChatTitle(props) {
           },
         })}
       >
-        {title != newTitle && (
-          <>
-            <Button onClick={updateTitle} variant="Unstyled">
-              <Tooltip label="Update title">
-                <CheckIcon />
-              </Tooltip>
-            </Button>
-            <Button onClick={() => setNewTitle(title)} variant="Unstyled">
-              <Tooltip label="Cancel changes">
-                <ResetIcon />
-              </Tooltip>
-            </Button>
-          </>
-        )}
-        <Button onClick={deleteConversation} variant="Unstyled">
-          <Tooltip label="Delete conversation">
-            <CrumpledPaperIcon />
-          </Tooltip>
-        </Button>
-        <Button onClick={closeConversation} variant="Unstyled">
-          <Tooltip label="Close conversation">
-            <Cross1Icon />
-          </Tooltip>
-        </Button>
+        <div className={styles.chat_title_edit}>
+          {title != newTitle && (
+            <>
+              <Button
+                onClick={updateTitle}
+                variant="Unstyled"
+                className={styles.chat_title_button}
+              >
+                <Tooltip label="Update title">
+                  <CheckIcon />
+                </Tooltip>
+              </Button>
+              <Button
+                onClick={() => setNewTitle(title)}
+                variant="Unstyled"
+                className={styles.chat_title_button}
+              >
+                <Tooltip label="Cancel changes">
+                  <ResetIcon />
+                </Tooltip>
+              </Button>
+            </>
+          )}
+          <Button
+            onClick={deleteConversation}
+            variant="Unstyled"
+            className={styles.chat_title_button}
+          >
+            <Tooltip label="Delete conversation">
+              <CrumpledPaperIcon />
+            </Tooltip>
+          </Button>
+          <Button
+            onClick={closeConversation}
+            variant="Unstyled"
+            className={styles.chat_title_button}
+          >
+            <Tooltip label="Close conversation">
+              <Cross1Icon />
+            </Tooltip>
+          </Button>
+        </div>
       </Group>
       <Input
         value={newTitle}
         variant="unstyled"
-        size="xl"
+        size="md"
         onChange={(event) => setNewTitle(event.target.value)}
-        sx={(theme) => ({
-          maxWidth: "65%",
-          "@media (max-width: 48em)": {
-            paddingTop: "2em",
-            maxWidth: "100%",
-          },
-        })}
+        className={styles.chat_title_text}
       />
     </div>
   );

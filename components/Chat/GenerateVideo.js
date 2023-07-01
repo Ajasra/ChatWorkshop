@@ -1,42 +1,28 @@
-import { Button } from "@mantine/core";
+import { Button, Center, Container, Image } from "@mantine/core";
 import { useEffect, useRef, useState } from "react";
 import { ShowError } from "utils/notifications";
 
 const LOCAL_KEY = process.env.NEXT_PUBLIC_LOCAL_KEY;
 
-const VideoPlayer = (props) => {
-  const { videourl } = props;
-
-  const videoRef = useRef(null);
-
-  useEffect(() => {
-    if (videourl !== null) {
-      videoRef.current.load();
-      videoRef.current.play();
-    }
-  }, [videourl]);
-
-  return (
-    <div>
-      <video ref={videoRef}>
-        {videourl && <source src={videourl} type="video/mp4" />}
-      </video>
-    </div>
-  );
-};
+import styles from "styles/Video.module.css";
+import VideoPlayer from "components/Video/VideoPlayer";
 
 export default function GenerateVideo(props) {
-  const {
-    text = "Of course, dear God! Here's another five-word haiku-style joke for you:\n" +
-      "\n" +
-      "Coffee spills, heartache brews, Stains on shirt, love's bitter stain, Dry cleaner, my savior.\n" +
-      "\n" +
-      "May this little haiku bring a smile to your divine lips and a chuckle to your cosmic heart!",
-  } = props;
+  const { text = "", genVideo, setGenVideo, updProcessing } = props;
 
   const [processing, setProcessing] = useState(false);
   const [video_id, setVideoId] = useState();
   const [videoUrl, setVideoUrl] = useState(null);
+  const [isVideoFinished, setIsVideoFinished] = useState(false);
+
+  const [height, setHeight] = useState(400);
+
+  function playVideo() {
+    // generateSpeech(text);
+    setProcessing(true);
+    setIsVideoFinished(false);
+    setVideoId("tlk_wiql2Fw6CqpeL6E361byr");
+  }
 
   async function generateSpeech(text) {
     setProcessing(true);
@@ -68,25 +54,30 @@ export default function GenerateVideo(props) {
   async function checkVideo() {
     console.log(processing);
     if (processing) {
-      const response = await fetch("/api/checkVideo", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-        },
-        body: JSON.stringify({ video_id: video_id, api_key: LOCAL_KEY }),
-      });
+      try {
+        const response = await fetch("/api/checkVideo", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+          body: JSON.stringify({ video_id: video_id, api_key: LOCAL_KEY }),
+        });
 
-      const json = await response.json().catch((err) => {
-        console.log(err);
-        ShowError("Error", "Error generating video");
-      });
+        const json = await response.json().catch((err) => {
+          console.log(err);
+          ShowError("Error", "Error generating video");
+        });
 
-      if (json.response !== null) {
-        if (json.response.status == "done") {
-          setVideoUrl(json.response.result_url);
-          setProcessing(false);
+        if (json.response !== null) {
+          if (json.response.status == "done") {
+            setVideoUrl(json.response.result_url);
+            setProcessing(false);
+          }
         }
+      } catch (e) {
+        ShowError("Error", "Coundn't fetch video");
+        setProcessing(false);
       }
     }
   }
@@ -102,24 +93,46 @@ export default function GenerateVideo(props) {
   useEffect(() => {
     if (videoUrl != null) {
       setProcessing(false);
+      updProcessing(false);
     }
   }, [videoUrl]);
 
+  useEffect(() => {
+    // check if it on mobile, if it is, set height to 300px
+    if (window.innerWidth < 768) {
+      setHeight(250);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (genVideo) {
+      console.log("generate video");
+      console.log(text);
+      generateSpeech(text);
+      setGenVideo(false);
+    }
+  }, [genVideo]);
   return (
-    <>
-      {videoUrl != null && <VideoPlayer videourl={videoUrl} />}
-      <Button
-        loading={processing}
-        disabled={processing}
-        onClick={() => {
-          // generateSpeech(text);
-          setProcessing(true);
-          setVideoId("tlk_JICJeyHLmWyI0ZaAUvXEf");
-        }}
-        color="blue"
-      >
-        Generate Video
-      </Button>
-    </>
+    <Container className={styles.video_container}>
+      <Image src="/sources/character.png" height={height} fit={"contain"} />
+      {videoUrl != null && !isVideoFinished && (
+        <Center className={styles.video_result}>
+          <VideoPlayer
+            videourl={videoUrl}
+            height={height}
+            setIsVideoFinished={setIsVideoFinished}
+          />
+        </Center>
+      )}
+      {/*<Button*/}
+      {/*  className={styles.video_button}*/}
+      {/*  loading={processing}*/}
+      {/*  disabled={processing}*/}
+      {/*  onClick={playVideo}*/}
+      {/*  color="blue"*/}
+      {/*>*/}
+      {/*  Generate Video*/}
+      {/*</Button>*/}
+    </Container>
   );
 }

@@ -68,9 +68,9 @@ const AudioPlayer = ({ filename }) => {
           onClick={handlePlay}
           disabled={isPlaying}
           loading={isPlaying}
+          variant="outline"
         >
           <PlayIcon />
-          <i className="fa-solid fa-copy"></i>
         </Button>
       )}
     </div>

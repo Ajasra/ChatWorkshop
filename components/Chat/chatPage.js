@@ -25,8 +25,8 @@ export default function ChatPage() {
   return (
     <>
       <ChatTitle conversation={curConversation} />
-      <ChatHistory conversation={curConversation} />
       <ChatForm conversation={curConversation} />
+      <ChatHistory conversation={curConversation} />
     </>
   );
 }

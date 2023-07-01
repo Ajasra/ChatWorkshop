@@ -12,6 +12,7 @@ export default function ConversationsList() {
     setChatContext({
       ...chatContext,
       selectedConversation: id,
+      action: "update history"
     });
   }
 

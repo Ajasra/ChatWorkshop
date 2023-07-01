@@ -9,7 +9,7 @@ const EXPIRE_DAYS = process.env.NEXT_PUBLIC_EXPIRE_DAYS;
 
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-const deleteOldFiles = () => {
+async function deleteOldFiles ()  {
   const folderPath = path.join(process.cwd(), "public", "resp");
   const files = fs.readdirSync("./public/resp");
 
@@ -36,9 +36,7 @@ export default async function handler(req, res) {
     let message = req.body.messages;
     let key = req.body.key;
 
-    console.log(message);
-
-    deleteOldFiles();
+    await deleteOldFiles();
 
     if (key !== LOCAL_KEY) {
       res.status(404).json({ error: "Access denied" });
@@ -54,7 +52,7 @@ export default async function handler(req, res) {
       textToSpeech(API_KEY, message, VOICE_ID, filename).then(
         async (response) => {
           // add short delay to be sure it finish writing in file
-          await delay(1500);
+          // await delay(1500);
           console.log(`Success, Audio saved as: ${filename}`);
           res.status(200).json({ error: null, response: timestamp.toFixed(0) });
         }

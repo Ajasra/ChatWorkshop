@@ -12,6 +12,37 @@ export default async function handler(req, res) {
       res.status(401).json({ error: "not authorized" });
       return;
     }
+    
+    const payload = JSON.stringify({
+      script: {
+        type: "text",
+        subtitles: "false",
+        provider: {
+          type: "microsoft",
+          voice_id: VOICE_ID,
+        },
+        ssml: "false",
+        input: text,
+      },
+      config: {
+        fluent: true,
+        pad_audio: 0.2,
+        stitch: true,
+        driver_expressions: {
+          expressions: [
+            {
+              expression: EXPRESSION,
+              start_frame: 0,
+              intensity: 0.5,
+            },
+          ],
+        },
+      },
+      source_url:
+          "https://create-images-results.d-id.com/auth0%7C649d87762049e43702edc226/upl_JjUMzzt0b6vxmwT-SmVx6/image.png",
+    });
+    
+    console.log(payload);
 
     const response = await fetch(generate_url, {
       method: "POST",
@@ -21,35 +52,10 @@ export default async function handler(req, res) {
         Accept: "*/*",
         Connection: "keep-alive",
       },
-      body: JSON.stringify({
-        script: {
-          type: "text",
-          subtitles: "false",
-          provider: {
-            type: "microsoft",
-            voice_id: VOICE_ID,
-          },
-          ssml: "false",
-          input: text,
-        },
-        config: {
-          fluent: true,
-          pad_audio: 0.2,
-          stitch: true,
-          driver_expressions: {
-            expressions: [
-              {
-                expression: EXPRESSION,
-                start_frame: 0,
-                intensity: 0.5,
-              },
-            ],
-          },
-        },
-        source_url:
-          "https://create-images-results.d-id.com/auth0%7C649d87762049e43702edc226/upl_JjUMzzt0b6vxmwT-SmVx6/image.png",
-      }),
+      body: payload,
     });
+    
+    console.log('generating video in the row');
 
     response
       .json()
