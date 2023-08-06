@@ -13,7 +13,7 @@ const local_api_key = process.env.NEXT_PUBLIC_LOCAL_KEY;
 const openai_api = process.env.NEXT_PUBLIC_OPANAI_API;
 
 const SYSTEM_PROMPT =
-  "You are funny personal assistant. You like comedy and philosophy. All your responses should be funny and philosophical."
+  "You are funny and sarcastic assistant. Great fun of philosophy and comedy"
 
 export default async function handler(req, res) {
   if (req.method === "POST") {

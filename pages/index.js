@@ -6,8 +6,6 @@ import ChatPage from "components/Chat/chatPage";
 export default function Home() {
   const chatContext = useContext(ChatContext);
 
-  console.log(chatContext);
-
   return (
     <>
       <LayoutApp>

@@ -1,12 +1,14 @@
-import { useEffect, useRef } from "react";
+import {useEffect, useRef, useState} from "react";
 
 export default function VideoPlayer(props) {
   const { videourl, height, setIsVideoFinished } = props;
+  const [ prevVideo, setPrevVideo ] = useState(null);
 
   const videoRef = useRef(null);
 
   useEffect(() => {
-    if (videourl !== null) {
+    if (videourl !== null && videourl !== prevVideo) {
+      setPrevVideo(videourl);
       videoRef.current.load();
       videoRef.current.play();
       setIsVideoFinished(false);

@@ -1,8 +1,9 @@
-import { Button, Center, Container, Image } from "@mantine/core";
-import { useEffect, useRef, useState } from "react";
+import { Center, Container, Image } from "@mantine/core";
+import { useEffect, useState } from "react";
 import { ShowError } from "utils/notifications";
 
 const LOCAL_KEY = process.env.NEXT_PUBLIC_LOCAL_KEY;
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_API;
 
 import styles from "styles/Video.module.css";
 import VideoPlayer from "components/Video/VideoPlayer";
@@ -17,18 +18,22 @@ export default function GenerateVideo(props) {
 
   const [height, setHeight] = useState(400);
 
-  function playVideo() {
-    // generateSpeech(text);
-    setProcessing(true);
-    setIsVideoFinished(false);
-    setVideoId("tlk_wiql2Fw6CqpeL6E361byr");
-  }
+  console.log("videoUrl", videoUrl);
+  console.log("video_id", video_id);
+  console.log("processing", processing);
+  console.log("isVideoFinished", isVideoFinished);
 
-  async function generateSpeech(text) {
+  async function generateVideo(text) {
     setProcessing(true);
     setVideoUrl(null);
+    setIsVideoFinished(false);
 
-    const response = await fetch("/api/generateVideoAPI", {
+    let api_url = "/api/generateVideoAPI";
+    if (BACKEND_URL !== undefined) {
+      api_url = `${BACKEND_URL}/generateVideoAPI`;
+    }
+
+    const response = await fetch(api_url, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -42,17 +47,23 @@ export default function GenerateVideo(props) {
       ShowError("Error", "Error generating video");
     });
 
-    if (json.response !== null) {
-      console.log("json.response", json.response);
-      setVideoId(json.response.id);
+    if (json?.response !== null) {
+      if (json.response?.kind == "InsufficientCreditsError") {
+        console.error("Insufficient credit");
+        ShowError("Error", "Insufficient credit");
+        updProcessing(false);
+        setVideoId(null);
+      }
+      if(json.response?.id){
+        setVideoId(json.response.id);
+      }
     } else {
-      console.log("json", json);
+      console.error("json", json);
       ShowError("Error", "Error generating video");
     }
   }
 
   async function checkVideo() {
-    console.log(processing);
     if (processing) {
       try {
         const response = await fetch("/api/checkVideo", {
@@ -65,7 +76,7 @@ export default function GenerateVideo(props) {
         });
 
         const json = await response.json().catch((err) => {
-          console.log(err);
+          console.error(err);
           ShowError("Error", "Error generating video");
         });
 
@@ -106,12 +117,19 @@ export default function GenerateVideo(props) {
 
   useEffect(() => {
     if (genVideo) {
-      console.log("generate video");
-      console.log(text);
-      generateSpeech(text);
+      generateVideo(text);
       setGenVideo(false);
     }
   }, [genVideo]);
+
+  useEffect(() => {
+    if (isVideoFinished) {
+      setVideoUrl(null);
+      setVideoId(null);
+      setProcessing(false);
+    }
+  }, [isVideoFinished]);
+
   return (
     <Container className={styles.video_container}>
       <Image src="/sources/character.png" height={height} fit={"contain"} />
@@ -124,15 +142,6 @@ export default function GenerateVideo(props) {
           />
         </Center>
       )}
-      {/*<Button*/}
-      {/*  className={styles.video_button}*/}
-      {/*  loading={processing}*/}
-      {/*  disabled={processing}*/}
-      {/*  onClick={playVideo}*/}
-      {/*  color="blue"*/}
-      {/*>*/}
-      {/*  Generate Video*/}
-      {/*</Button>*/}
     </Container>
   );
 }

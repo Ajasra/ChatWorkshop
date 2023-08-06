@@ -105,7 +105,7 @@ export default function ChatForm(props) {
           return json.response;
         }
       } catch (e) {
-        console.log(e);
+        console.error(e);
         setProcessing(false);
         setQuestion("");
         return null;
@@ -123,6 +123,9 @@ export default function ChatForm(props) {
 
     setProcessing(true);
     let api_url = "/api/elevenlabs";
+    if (BACKEND_URL !== undefined) {
+      api_url = `${BACKEND_URL}/elevenlabs`;
+    }
     const response = await fetch(api_url, {
       method: "POST",
       headers: {
@@ -157,7 +160,6 @@ export default function ChatForm(props) {
     }
     ShowSuccess("Text response generated");
     setProcessing(true);
-    console.log(resp_text);
     ShowInfo("Generating video");
     setAnswer(resp_text);
     setGenVideo(true);
