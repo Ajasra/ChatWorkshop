@@ -1,0 +1,32 @@
+.video_container {
+  height: 400px;
+  position: relative;
+  padding: 0px;
+  margin-bottom: 1em;
+}
+.video_result {
+  height: 400px;
+  position: absolute;
+  top: 0px;
+  overflow: hidden;
+  width: 100%;
+}
+
+.video_button {
+  position: absolute;
+  bottom: 0px;
+  left: 45%;
+}
+
+@media screen and (max-width: 48em) {
+  .video_container {
+    height: 250px;
+  }
+  .video_result {
+    height: 250px;
+  }
+
+  .video_button {
+    left: 29%;
+  }
+}

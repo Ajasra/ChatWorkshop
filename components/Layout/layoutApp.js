@@ -6,7 +6,7 @@ import {
   Navbar,
   useMantineTheme,
 } from "@mantine/core";
-import styles from "styles/styles/Home.module.css";
+import styles from "styles/Home.module.css";
 import Navigation from "components/Layout/navbar";
 import { useState } from "react";
 import AppHeader from "components/Layout/header";
